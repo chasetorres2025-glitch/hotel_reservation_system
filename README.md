@@ -109,7 +109,7 @@ npm run dev
 
 ```
 hotel_reservation_system/
-├── 产品说明书.md              # 产品需求文档
+├── 参考论文.docx              # 参考论文资料
 ├── database/
 │   └── init.sql              # 数据库初始化脚本
 ├── hotel-backend/            # 后端项目
