@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hotel.mapper.RoomTypeMapper">
+
+    <resultMap id="BaseResultMap" type="com.hotel.entity.RoomType">
+        <id column="id" property="id"/>
+        <result column="type_code" property="typeCode"/>
+        <result column="type_name" property="typeName"/>
+        <result column="base_price" property="basePrice"/>
+        <result column="bed_type" property="bedType"/>
+        <result column="area" property="area"/>
+        <result column="facilities" property="facilities"/>
+        <result column="description" property="description"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, type_code, type_name, base_price, bed_type, area, facilities, description, status, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM sys_room_type
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByTypeCode" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM sys_room_type
+        WHERE type_code = #{typeCode}
+    </select>
+
+    <select id="selectAllEnabled" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM sys_room_type
+        WHERE status = 1
+        ORDER BY id
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM sys_room_type
+        ORDER BY id
+    </select>
+
+    <insert id="insert" parameterType="com.hotel.entity.RoomType" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_room_type (type_code, type_name, base_price, bed_type, area, facilities, description, status)
+        VALUES (#{typeCode}, #{typeName}, #{basePrice}, #{bedType}, #{area}, #{facilities}, #{description}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.hotel.entity.RoomType">
+        UPDATE sys_room_type
+        <set>
+            <if test="typeCode != null">
+                type_code = #{typeCode},
+            </if>
+            <if test="typeName != null">
+                type_name = #{typeName},
+            </if>
+            <if test="basePrice != null">
+                base_price = #{basePrice},
+            </if>
+            <if test="bedType != null">
+                bed_type = #{bedType},
+            </if>
+            <if test="area != null">
+                area = #{area},
+            </if>
+            <if test="facilities != null">
+                facilities = #{facilities},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM sys_room_type WHERE id = #{id}
+    </delete>
+
+    <update id="updateStatus">
+        UPDATE sys_room_type SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <select id="checkTypeCodeExists" resultType="int">
+        SELECT COUNT(*)
+        FROM sys_room_type
+        WHERE type_code = #{typeCode}
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+</mapper>

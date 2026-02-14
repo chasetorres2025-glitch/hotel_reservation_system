@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hotel.mapper.OrderMapper">
+
+    <resultMap id="BaseResultMap" type="com.hotel.entity.Order">
+        <id column="id" property="id"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="user_id" property="userId"/>
+        <result column="room_id" property="roomId"/>
+        <result column="check_in_date" property="checkInDate"/>
+        <result column="check_out_date" property="checkOutDate"/>
+        <result column="guest_count" property="guestCount"/>
+        <result column="contact_name" property="contactName"/>
+        <result column="contact_phone" property="contactPhone"/>
+        <result column="total_amount" property="totalAmount"/>
+        <result column="paid_amount" property="paidAmount"/>
+        <result column="status" property="status"/>
+        <result column="special_request" property="specialRequest"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="username" property="username"/>
+        <result column="real_name" property="realName"/>
+        <result column="room_number" property="roomNumber"/>
+        <result column="type_name" property="typeName"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        o.id, o.order_no, o.user_id, o.room_id, o.check_in_date, o.check_out_date, o.guest_count,
+        o.contact_name, o.contact_phone, o.total_amount, o.paid_amount, o.status, o.special_request,
+        o.remark, o.create_time, o.update_time
+    </sql>
+
+    <sql id="Join_Column_List">
+        <include refid="Base_Column_List"/>, u.username, u.real_name, r.room_number, t.type_name
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Join_Column_List"/>
+        FROM sys_order o
+        LEFT JOIN sys_user u ON o.user_id = u.id
+        LEFT JOIN sys_room r ON o.room_id = r.id
+        LEFT JOIN sys_room_type t ON r.type_id = t.id
+        WHERE o.id = #{id}
+    </select>
+
+    <select id="selectByOrderNo" resultMap="BaseResultMap">
+        SELECT <include refid="Join_Column_List"/>
+        FROM sys_order o
+        LEFT JOIN sys_user u ON o.user_id = u.id
+        LEFT JOIN sys_room r ON o.room_id = r.id
+        LEFT JOIN sys_room_type t ON r.type_id = t.id
+        WHERE o.order_no = #{orderNo}
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT <include refid="Join_Column_List"/>
+        FROM sys_order o
+        LEFT JOIN sys_user u ON o.user_id = u.id
+        LEFT JOIN sys_room r ON o.room_id = r.id
+        LEFT JOIN sys_room_type t ON r.type_id = t.id
+        <where>
+            <if test="orderNo != null and orderNo != ''">
+                AND o.order_no LIKE CONCAT('%', #{orderNo}, '%')
+            </if>
+            <if test="userId != null">
+                AND o.user_id = #{userId}
+            </if>
+            <if test="roomId != null">
+                AND o.room_id = #{roomId}
+            </if>
+            <if test="status != null">
+                AND o.status = #{status}
+            </if>
+            <if test="contactName != null and contactName != ''">
+                AND o.contact_name LIKE CONCAT('%', #{contactName}, '%')
+            </if>
+            <if test="contactPhone != null and contactPhone != ''">
+                AND o.contact_phone LIKE CONCAT('%', #{contactPhone}, '%')
+            </if>
+            <if test="checkInDateStart != null">
+                AND o.check_in_date >= #{checkInDateStart}
+            </if>
+            <if test="checkInDateEnd != null">
+                AND o.check_in_date &lt;= #{checkInDateEnd}
+            </if>
+        </where>
+        ORDER BY o.create_time DESC
+    </select>
+
+    <select id="count" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM sys_order o
+        <where>
+            <if test="orderNo != null and orderNo != ''">
+                AND o.order_no LIKE CONCAT('%', #{orderNo}, '%')
+            </if>
+            <if test="userId != null">
+                AND o.user_id = #{userId}
+            </if>
+            <if test="roomId != null">
+                AND o.room_id = #{roomId}
+            </if>
+            <if test="status != null">
+                AND o.status = #{status}
+            </if>
+            <if test="contactName != null and contactName != ''">
+                AND o.contact_name LIKE CONCAT('%', #{contactName}, '%')
+            </if>
+            <if test="contactPhone != null and contactPhone != ''">
+                AND o.contact_phone LIKE CONCAT('%', #{contactPhone}, '%')
+            </if>
+            <if test="checkInDateStart != null">
+                AND o.check_in_date >= #{checkInDateStart}
+            </if>
+            <if test="checkInDateEnd != null">
+                AND o.check_in_date &lt;= #{checkInDateEnd}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT <include refid="Join_Column_List"/>
+        FROM sys_order o
+        LEFT JOIN sys_user u ON o.user_id = u.id
+        LEFT JOIN sys_room r ON o.room_id = r.id
+        LEFT JOIN sys_room_type t ON r.type_id = t.id
+        WHERE o.user_id = #{userId}
+        <if test="status != null">
+            AND o.status = #{status}
+        </if>
+        ORDER BY o.create_time DESC
+    </select>
+
+    <insert id="insert" parameterType="com.hotel.entity.Order" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_order (order_no, user_id, room_id, check_in_date, check_out_date, guest_count,
+                              contact_name, contact_phone, total_amount, paid_amount, status, special_request, remark)
+        VALUES (#{orderNo}, #{userId}, #{roomId}, #{checkInDate}, #{checkOutDate}, #{guestCount},
+                #{contactName}, #{contactPhone}, #{totalAmount}, #{paidAmount}, #{status}, #{specialRequest}, #{remark})
+    </insert>
+
+    <update id="update" parameterType="com.hotel.entity.Order">
+        UPDATE sys_order
+        <set>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="paidAmount != null">
+                paid_amount = #{paidAmount},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE sys_order SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <update id="updatePaidAmount">
+        UPDATE sys_order SET paid_amount = #{paidAmount} WHERE id = #{id}
+    </update>
+
+    <select id="countByStatus" resultType="int">
+        SELECT COUNT(*) FROM sys_order WHERE status = #{status}
+    </select>
+
+    <select id="sumTotalAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(total_amount), 0)
+        FROM sys_order
+        <where>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="sumPaidAmount" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(paid_amount), 0) FROM sys_order
+    </select>
+
+    <select id="sumTotalAmountByDate" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(total_amount), 0)
+        FROM sys_order
+        WHERE DATE(create_time) = #{date}
+    </select>
+
+    <select id="countByDate" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM sys_order
+        WHERE DATE(create_time) = #{date}
+    </select>
+
+    <select id="checkRoomAvailable" resultType="int">
+        SELECT COUNT(*)
+        FROM sys_order
+        WHERE room_id = #{roomId}
+          AND status IN (0, 1, 2, 3)
+          AND (
+              (check_in_date &lt;= #{checkInDate} AND check_out_date > #{checkInDate})
+              OR (check_in_date &lt; #{checkOutDate} AND check_out_date >= #{checkOutDate})
+              OR (check_in_date >= #{checkInDate} AND check_out_date &lt;= #{checkOutDate})
+          )
+        <if test="excludeOrderId != null">
+            AND id != #{excludeOrderId}
+        </if>
+    </select>
+
+</mapper>

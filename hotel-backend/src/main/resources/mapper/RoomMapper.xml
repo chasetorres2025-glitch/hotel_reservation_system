@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hotel.mapper.RoomMapper">
+
+    <resultMap id="BaseResultMap" type="com.hotel.entity.Room">
+        <id column="id" property="id"/>
+        <result column="room_number" property="roomNumber"/>
+        <result column="type_id" property="typeId"/>
+        <result column="floor" property="floor"/>
+        <result column="price" property="price"/>
+        <result column="status" property="status"/>
+        <result column="description" property="description"/>
+        <result column="image_url" property="imageUrl"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="type_name" property="typeName"/>
+        <result column="type_code" property="typeCode"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        r.id, r.room_number, r.type_id, r.floor, r.price, r.status, r.description, r.image_url, r.create_time, r.update_time
+    </sql>
+
+    <sql id="Join_Column_List">
+        <include refid="Base_Column_List"/>, t.type_name, t.type_code
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Join_Column_List"/>
+        FROM sys_room r
+        LEFT JOIN sys_room_type t ON r.type_id = t.id
+        WHERE r.id = #{id}
+    </select>
+
+    <select id="selectByRoomNumber" resultMap="BaseResultMap">
+        SELECT <include refid="Join_Column_List"/>
+        FROM sys_room r
+        LEFT JOIN sys_room_type t ON r.type_id = t.id
+        WHERE r.room_number = #{roomNumber}
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT <include refid="Join_Column_List"/>
+        FROM sys_room r
+        LEFT JOIN sys_room_type t ON r.type_id = t.id
+        <where>
+            <if test="roomNumber != null and roomNumber != ''">
+                AND r.room_number LIKE CONCAT('%', #{roomNumber}, '%')
+            </if>
+            <if test="typeId != null">
+                AND r.type_id = #{typeId}
+            </if>
+            <if test="floor != null">
+                AND r.floor = #{floor}
+            </if>
+            <if test="status != null">
+                AND r.status = #{status}
+            </if>
+        </where>
+        ORDER BY r.room_number
+    </select>
+
+    <select id="count" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM sys_room r
+        <where>
+            <if test="roomNumber != null and roomNumber != ''">
+                AND r.room_number LIKE CONCAT('%', #{roomNumber}, '%')
+            </if>
+            <if test="typeId != null">
+                AND r.type_id = #{typeId}
+            </if>
+            <if test="floor != null">
+                AND r.floor = #{floor}
+            </if>
+            <if test="status != null">
+                AND r.status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectAvailableRooms" resultMap="BaseResultMap">
+        SELECT <include refid="Join_Column_List"/>
+        FROM sys_room r
+        LEFT JOIN sys_room_type t ON r.type_id = t.id
+        WHERE r.status = 0
+        <if test="typeId != null">
+            AND r.type_id = #{typeId}
+        </if>
+        <if test="minPrice != null">
+            AND r.price >= #{minPrice}
+        </if>
+        <if test="maxPrice != null">
+            AND r.price &lt;= #{maxPrice}
+        </if>
+        ORDER BY r.price
+    </select>
+
+    <insert id="insert" parameterType="com.hotel.entity.Room" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_room (room_number, type_id, floor, price, status, description, image_url)
+        VALUES (#{roomNumber}, #{typeId}, #{floor}, #{price}, #{status}, #{description}, #{imageUrl})
+    </insert>
+
+    <update id="update" parameterType="com.hotel.entity.Room">
+        UPDATE sys_room
+        <set>
+            <if test="roomNumber != null">
+                room_number = #{roomNumber},
+            </if>
+            <if test="typeId != null">
+                type_id = #{typeId},
+            </if>
+            <if test="floor != null">
+                floor = #{floor},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="imageUrl != null">
+                image_url = #{imageUrl},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM sys_room WHERE id = #{id}
+    </delete>
+
+    <update id="updateStatus">
+        UPDATE sys_room SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <select id="checkRoomNumberExists" resultType="int">
+        SELECT COUNT(*)
+        FROM sys_room
+        WHERE room_number = #{roomNumber}
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+    <select id="countByStatus" resultType="int">
+        SELECT COUNT(*) FROM sys_room WHERE status = #{status}
+    </select>
+
+    <select id="countByTypeId" resultType="int">
+        SELECT COUNT(*) FROM sys_room WHERE type_id = #{typeId}
+    </select>
+
+</mapper>
