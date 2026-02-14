@@ -12,7 +12,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/hotel_system?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: P@ssw0rd
+    password: ${DB_PASSWORD:P@ssw0rd}
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       initial-size: 5
